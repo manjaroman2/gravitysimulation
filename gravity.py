@@ -65,12 +65,13 @@ class Body:
 
     def update(self, body: Body):
         if self.dm < 0:
-            return self.destory()
+            pass
+            # return self.destory()
         elif self.dm > 0: 
             self.m = self.dm
             dr = self.m / self.radial_density
-            if dr < 1: 
-                return self.destory()
+            # if dr < 1: 
+            #     return self.destory()
             self.r = dr
         dx = body.x - self.x
         dy = body.y - self.y
@@ -98,28 +99,30 @@ class Body:
 
 CONFIG = {
     'star_with_comets': lambda: [
-        Body(width / 3, height / 4, 1000000, 6, [-.3, .3]),
-        Body(width / 1.8, height / 4, 1000000, 5, [.3, .3]),
-        Body(width / 3, height / 1.8, 1000000, 5, [.3, -.3]),
-        Body(width / 1.5, height / 1.5, 10000, 5, [-.1, -.3]),
-        Body(width / 1.93, height / 4, 1000, 1, [.1, .1]),
-        Body(width / 1.95, height / 4, 1000, 1, [.1, .1]),
-        Body(width / 1.97, height / 4, 1000, 1, [.1, .1]),
-        Body(width / 1.99, height / 4, 1000, 1, [.1, .1]),
-        Body(width / 2, height / 2, 10000000000, 10, [0, 0])
+        Body(width / 1, height / 1, 1000,     6,  [-.1, .1]),
+        Body(width / 2, height / 2, 10000000,     10,  [-.1, .1]),
+        Body(width / 3, height / 3, 1000,     5,  [-.1, .1]),
+        Body(width / 4, height / 4, 1000,       5,  [-.1, .1]),
+        Body(width / 5, height / 5, 1000,        1,  [-.1, .1]),
+        Body(width / 6, height / 6, 1000,        1,  [-.1, .1]),
+        Body(width / 7, height / 7, 1000,        1,  [-.1, .1]),
+        Body(width / 8, height / 8, 1000,        1,  [-.1, .1]),
+        Body(width / 9, height / 9, 1000,     5,    [-.1, .1])
     ],
     '3stars': lambda: [
-        Body(width / 3, height / 3, 100000, 10, [0, .3]),
-        Body(width / 2, height / 1.5, 100000, 10, [.3, 0]),
-        Body(width / 1.5, height / 3, 100000, 10, [-.3, 0]),
-        Body(width / 2, height / 2, 100, 5, [0, -.3]),
+        Body(width / 3,   height / 3,   100000, 10, [0, .3]),
+        Body(width / 2,   height / 1.5, 100000, 10, [.3, 0]),
+        Body(width / 1.5, height / 3,   100000, 10, [-.3, 0]),
+        Body(width / 2,   height / 2,   100,    5,  [0, -.3]),
     ]
 }
 
-CURRENT_CONFIG = ''
+CURRENT_CONFIG = '3stars'
 
 
-def init_bodies(identifier_str: str = '3stars'):
+def init_bodies():
+    identifier_str = CURRENT_CONFIG
+    print(f"config={identifier_str}")
     identifier_str = identifier_str.lower()
     bodyidx = None
     if selected and bodies:
@@ -127,8 +130,7 @@ def init_bodies(identifier_str: str = '3stars'):
     if identifier_str not in CONFIG: 
         raise Exception(f'Invalid identifier:  {identifier_str}')
     bdis = CONFIG[identifier_str]()
-    global CURRENT_CONFIG
-    CURRENT_CONFIG = identifier_str
+
     if bodyidx:
         selected[0] = time.time()
         selected[1] = bodies[bodyidx]
@@ -163,17 +165,15 @@ def process_textin():
         elif textin[0][1].lower() == 'f':
             global myfont, myfontsmall
             myfont, myfontsmall, _ = init_font()
-
         elif textin[0][1].lower() == 's': 
             available_configs = list(CONFIG.keys())
-            print(available_configs)
-            if not CURRENT_CONFIG:
-                bodies = init_bodies(available_configs[0])
-            else: 
-                newconfig = available_configs[(available_configs.index(CURRENT_CONFIG)+1)%len(available_configs)]
-                bodies = init_bodies(newconfig)   
+            global CURRENT_CONFIG
+            CURRENT_CONFIG = available_configs[(available_configs.index(CURRENT_CONFIG)+1)%len(available_configs)]
+            bodies = init_bodies()   
         elif textin[0][1].lower() == 'h':
             print(help)
+        elif textin[0][1].lower() == 'e':
+            bodies = init_bodies()
         else:
             status = [time.time(), red, 'ValueError1']
     elif len(textin) > 1:
@@ -188,7 +188,9 @@ def process_textin():
                 status = [time.time(), red, str(e)]
         elif textin[0][1].lower() == 'g':
             try:
-                G = G_ORIG * float(''.join([x[1] for x in textin[1:]]))
+                print(f"G {G}->", end='')
+                G *= float(''.join([x[1] for x in textin[1:]]))
+                print(f"{G}")
                 bodies = init_bodies()
             except ValueError as e:
                 status = [time.time(), red, str(e)]
@@ -224,6 +226,7 @@ def process_textin():
                     status = [time.time(), red, str(e)]
             else:
                 status = [time.time(), red, 'no body selected']
+
         else:
             status = [time.time(), red, 'ValueError2']
     if not status:
@@ -343,8 +346,8 @@ while 1:
             j += 1
 
     if textin:
-        if time.time() - textin[-1][0] > 4:
-            process_textin()
+        # if time.time() - textin[-1][0] > 4:
+        #     process_textin()
         textsurface = myfont.render(
             ''.join([x[1] for x in textin]), True, white)
         screen.blit(textsurface, (0, 0))
