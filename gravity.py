@@ -8,7 +8,7 @@ import random
 FPS = 30
 ITERATIONS = 1
 G_ORIG = 6.67430 * 10 ** -11
-G = G_ORIG * 100000
+G = G_ORIG * 1000000
 # G = 1
 colors = [(255, 0, 0), (0, 255, 0),
           (255, 0, 255), (0, 255, 255), (255, 255, 0), (255, 255, 255)]
@@ -77,13 +77,14 @@ class Body:
         dy = body.y - self.y
         r2 = dx * dx + dy * dy
         if r2 <= (self.r + body.r) ** 2:
-            self.dm = self.m - body.m
+            # self.dm = self.m - body.m
             # self.r = self.radial_density / self.m
             # self.v[0] *= -1
             # self.v[1] *= -1
             pass
         else:
-            a = G * body.m / r2
+            r3_inv = (r2*r2**0.5)**-1
+            a = G * body.m * r3_inv
             # self.a = [a * dx, a * dy]
             self.v[0] += a * dx
             self.v[1] += a * dy
@@ -110,9 +111,9 @@ CONFIG = {
         Body(width / 9, height / 9, 1000,     5,    [-.1, .1])
     ],
     '3stars': lambda: [
-        Body(width / 3,   height / 3,   100000, 10, [0, .3]),
-        Body(width / 2,   height / 1.5, 100000, 10, [.3, 0]),
-        Body(width / 1.5, height / 3,   100000, 10, [-.3, 0]),
+        Body(width / 3,   height / 3,   1000000, 10, [0, .3]),
+        Body(width / 2,   height / 1.5, 1000000, 10, [.3, 0]),
+        Body(width / 1.5, height / 3,   1000000, 10, [-.3, 0]),
         Body(width / 2,   height / 2,   100,    5,  [0, -.3]),
     ]
 }
